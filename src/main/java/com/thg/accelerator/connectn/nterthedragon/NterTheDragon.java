@@ -1,4 +1,4 @@
-package com.thg.accelerator.connectn.ai.marcus;
+package com.thg.accelerator.connectn.nterthedragon;
 
 import com.thehutgroup.accelerator.connectn.player.Board;
 import com.thehutgroup.accelerator.connectn.player.Counter;
