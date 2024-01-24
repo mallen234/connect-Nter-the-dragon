@@ -6,14 +6,73 @@ import com.thehutgroup.accelerator.connectn.player.Player;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 
 public class NterTheDragon extends Player {
+  List<List<Integer>> winStates;
   public NterTheDragon(Counter counter) {
     //TODO: fill in your name here
     super(counter, NterTheDragon.class.getName());
   }
+
+  public List<List<Integer>> winStates(Counter[][] board){
+      List<List<Integer>> winCoordinates = new ArrayList<>();
+
+      // Check horizontal wins
+      for (int row = 0; row < board.length; row++) {
+        for (int col = 0; col <= board[row].length - 4; col++) {
+          List<Integer> coordinates = new ArrayList<>();
+          for (int i = 0; i < 4; i++) {
+            coordinates.add(row);
+            coordinates.add(col + i);
+          }
+          winCoordinates.add(coordinates);
+        }
+      }
+
+      // Check vertical wins
+      for (int col = 0; col < board[0].length; col++) {
+        for (int row = 0; row <= board.length - 4; row++) {
+          List<Integer> coordinates = new ArrayList<>();
+          for (int i = 0; i < 4; i++) {
+            coordinates.add(row + i);
+            coordinates.add(col);
+          }
+          winCoordinates.add(coordinates);
+        }
+      }
+
+      // Check diagonal wins (from top-left to bottom-right)
+      for (int row = 0; row <= board.length - 4; row++) {
+        for (int col = 0; col <= board[row].length - 4; col++) {
+          List<Integer> coordinates = new ArrayList<>();
+          for (int i = 0; i < 4; i++) {
+            coordinates.add(row + i);
+            coordinates.add(col + i);
+          }
+          winCoordinates.add(coordinates);
+        }
+      }
+
+      // Check diagonal wins (from top-right to bottom-left)
+      for (int row = 0; row <= board.length - 4; row++) {
+        for (int col = 3; col < board[row].length; col++) {
+          List<Integer> coordinates = new ArrayList<>();
+          for (int i = 0; i < 4; i++) {
+            coordinates.add(row + i);
+            coordinates.add(col - i);
+          }
+          winCoordinates.add(coordinates);
+        }
+      }
+      winStates = winCoordinates;
+      return winCoordinates;
+  }
+
+
 
   public int takeRandomMove(Counter[][] counters){
     Random rand = new Random();
@@ -24,19 +83,26 @@ public class NterTheDragon extends Player {
       if (counters[move][7] == null){
         return move;
       }
-
     }
   }
 
+  public int takeBetterMove(Counter[][] counters){
+    for (int i : winStates){}
+
+
+  }
   public Counter[][] getCounters(Board board){
 
     Method[] boardMethods = board.getClass().getDeclaredMethods();
     Counter[][] counters = new Counter[0][];
+    method.getName().equals("getCounterPlacements")
+
+
     for (Method method : boardMethods){
       if (method.getName().equals("getCounterPlacements")){
         try {
           method.setAccessible(true);
-          counters = (Counter[][]) method.invoke(board);
+          counters = (Counter[][]) method.invoke(  board);
           System.out.println("=======");
 
           System.out.println(counters);
