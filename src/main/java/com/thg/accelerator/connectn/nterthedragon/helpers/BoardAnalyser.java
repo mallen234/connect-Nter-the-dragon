@@ -1,4 +1,4 @@
-package com.thg.accelerator.connectn.nterthedragon;
+package com.thg.accelerator.connectn.nterthedragon.helpers;
 
 
 import com.thehutgroup.accelerator.connectn.player.Board;

@@ -69,9 +69,9 @@ public class NterTheVoid extends Player {
         return winCoordinates;
     }
 
-    public List<Integer> possibleMoves(Counter[][] board){
-
-    }
+//    public List<Integer> possibleMoves(Counter[][] board){
+//
+//    }
 
     public int takeRandomMove(Counter[][] counters){
         Random rand = new Random();
@@ -84,12 +84,6 @@ public class NterTheVoid extends Player {
             }
         }
     }
-
-//    public int takeBetterMove(Counter[][] counters){
-//        for (int i : winStates){}
-//
-//
-//    }
 
     @Override
     public int makeMove(Board board) {

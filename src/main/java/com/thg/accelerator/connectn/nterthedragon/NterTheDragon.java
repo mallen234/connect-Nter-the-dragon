@@ -1,5 +1,7 @@
 package com.thg.accelerator.connectn.nterthedragon;
 import com.thehutgroup.accelerator.connectn.player.*;
+import com.thg.accelerator.connectn.nterthedragon.helpers.BoardAnalyser;
+import com.thg.accelerator.connectn.nterthedragon.helpers.GameState;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -104,8 +106,7 @@ public class NterTheDragon extends Player {
     return takeRandomMove(counters);
   }
 
-  public Counter[][] getCounters(Board board) {
-    try {}
+  public Counter[][] getCounters(Board board) throws NoSuchMethodException {
     Method method = board.getClass().getDeclaredMethod("getCounterPlacements");
     Counter[][] counters = new Counter[0][];
 
