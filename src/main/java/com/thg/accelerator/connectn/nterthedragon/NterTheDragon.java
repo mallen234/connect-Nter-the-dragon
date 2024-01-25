@@ -1,8 +1,5 @@
 package com.thg.accelerator.connectn.nterthedragon;
-import com.thehutgroup.accelerator.connectn.player.Board;
-import com.thehutgroup.accelerator.connectn.player.Counter;
-import com.thehutgroup.accelerator.connectn.player.GameConfig;
-import com.thehutgroup.accelerator.connectn.player.Player;
+import com.thehutgroup.accelerator.connectn.player.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -13,9 +10,11 @@ import java.util.Random;
 
 public class NterTheDragon extends Player {
   List<List<Integer>> winStates;
+  BoardAnalyser boardAnalyser;
   public NterTheDragon(Counter counter) {
     //TODO: fill in your name here
     super(counter, NterTheDragon.class.getName());
+    boardAnalyser = new BoardAnalyser(new GameConfig(10,8,4));
   }
 
   public List<List<Integer>> winStates(Counter[][] board){
@@ -73,7 +72,6 @@ public class NterTheDragon extends Player {
   }
 
 
-
   public int takeRandomMove(Counter[][] counters){
     Random rand = new Random();
 
@@ -86,33 +84,44 @@ public class NterTheDragon extends Player {
     }
   }
 
-  public int takeBetterMove(Counter[][] counters){
-    for (int i : winStates){}
-
-
+  public boolean isMoveWinner(int move, Board board) throws InvalidMoveException {
+    Board boardCheck = new Board(board,move,getCounter());
+    GameState gameState =  boardAnalyser.calculateGameState(boardCheck);
+    return gameState.isWin();
   }
-  public Counter[][] getCounters(Board board){
 
-    Method[] boardMethods = board.getClass().getDeclaredMethods();
-    Counter[][] counters = new Counter[0][];
-    method.getName().equals("getCounterPlacements")
-
-
-    for (Method method : boardMethods){
-      if (method.getName().equals("getCounterPlacements")){
-        try {
-          method.setAccessible(true);
-          counters = (Counter[][]) method.invoke(  board);
-          System.out.println("=======");
-
-          System.out.println(counters);
-          System.out.println("=======");
-
-        } catch (IllegalAccessException e) {
-          throw new RuntimeException(e);
-        } catch (InvocationTargetException e) {
-          throw new RuntimeException(e);
+  public int takeBetterMove(Counter[][] counters, Board board) {
+    for (int i = 0; i < 10; i++) {
+      try {
+        if (isMoveWinner(i, board)) {
+          return i;
         }
+      } catch (InvalidMoveException e) {
+        throw new RuntimeException(e);
+      }
+
+    }
+    return takeRandomMove(counters);
+  }
+
+  public Counter[][] getCounters(Board board) {
+    try {}
+    Method method = board.getClass().getDeclaredMethod("getCounterPlacements");
+    Counter[][] counters = new Counter[0][];
+
+    if (method.getName().equals("getCounterPlacements")){
+      try {
+        method.setAccessible(true);
+        counters = (Counter[][]) method.invoke(  board);
+        System.out.println("=======");
+
+        System.out.println(counters);
+        System.out.println("=======");
+
+      } catch (IllegalAccessException e) {
+        throw new RuntimeException(e);
+      } catch (InvocationTargetException e) {
+        throw new RuntimeException(e);
       }
     }
     return counters;
@@ -123,8 +132,8 @@ public class NterTheDragon extends Player {
     //TODO: some crazy analysis
     //TODO: make sure said analysis uses less than 2G of heap and returns within 10 seconds on whichever machine is running it
 
-    Counter[][] counters =  getCounters(board);
-    int move = takeRandomMove(counters);
+    Counter[][] counters =  BoardThief.stealCounters(board);
+    int move = takeBetterMove(counters,board);
     return move;
   }
 }
