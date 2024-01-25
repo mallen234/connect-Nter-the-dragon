@@ -8,11 +8,11 @@ import java.util.List;
 import java.util.Random;
 
 
-public class NterTheVoid extends Player {
+public class NginConnect extends Player {
     List<List<Integer>> winStates;
-    public NterTheVoid(Counter counter) {
+    public NginConnect(Counter counter) {
         //TODO: fill in your name here
-        super(counter, NterTheVoid.class.getName());
+        super(counter, NginConnect.class.getName());
     }
 
     public List<List<Integer>> winStates(Counter[][] board){
@@ -92,6 +92,7 @@ public class NterTheVoid extends Player {
 
         Counter[][] counters =  BoardThief.stealCounters(board);
         int move = takeRandomMove(counters);
-        return move;
+        return 1;
     }
 }
+

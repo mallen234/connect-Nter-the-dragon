@@ -86,6 +86,12 @@ public class NterTheDragon extends Player {
     }
   }
 
+  public boolean isMoveBlocker(int move, Board board) throws InvalidMoveException {
+    Board boardCheck = new Board(board,move,getCounter().getOther());
+    GameState gameState =  boardAnalyser.calculateGameState(boardCheck);
+    return gameState.isWin();
+  }
+
   public boolean isMoveWinner(int move, Board board) throws InvalidMoveException {
     Board boardCheck = new Board(board,move,getCounter());
     GameState gameState =  boardAnalyser.calculateGameState(boardCheck);
@@ -96,6 +102,16 @@ public class NterTheDragon extends Player {
     for (int i = 0; i < 10; i++) {
       try {
         if (isMoveWinner(i, board)) {
+          return i;
+        }
+      } catch (InvalidMoveException e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    for (int i = 0; i < 10; i++) {
+      try {
+        if (isMoveBlocker(i, board)) {
           return i;
         }
       } catch (InvalidMoveException e) {
