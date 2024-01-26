@@ -29,7 +29,7 @@ public class NrichedUrAInium extends Player {
         if (depth == 0 || boardAnalyser.calculateGameState(board).isEnd()) {
             return evaluateBoard(board);
         }
-        if (Duration.between(startTime, Instant.now()).toSeconds() > 8){
+        if (Duration.between(startTime, Instant.now()).toSeconds() > 8.5){
             throw new TimeoutException();
         }
 
@@ -72,7 +72,7 @@ public class NrichedUrAInium extends Player {
             Counter counter = gameState.getWinner();
             if (counter == getCounter()){
 //                System.out.println("\nwin");
-                return 100000;
+                return 10000000;
             } else {
 //                System.out.println("\nloss");
                 return -100000;
@@ -117,7 +117,7 @@ public class NrichedUrAInium extends Player {
         Instant startTime = Instant.now();
         int depth = 4;
 
-        while (Duration.between(startTime, Instant.now()).toSeconds() < 7){
+        while (Duration.between(startTime, Instant.now()).toSeconds() < 8.5){
             System.out.printf("at depth: %d\n",depth);
             try {
                 move = takeBetterMove(counters,board,depth,startTime);
