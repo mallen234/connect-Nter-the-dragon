@@ -1,88 +1,109 @@
 package com.thg.accelerator.connectn.nterthedragon;
+
+
 import com.thehutgroup.accelerator.connectn.player.*;
+import com.thg.accelerator.connectn.nterthedragon.helpers.BoardAnalyser;
+import com.thg.accelerator.connectn.nterthedragon.helpers.GameState;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.TimeoutException;
 
 
 public class NterTheVoid extends Player {
     List<List<Integer>> winStates;
+    private BoardAnalyser boardAnalyser;
     public NterTheVoid(Counter counter) {
         //TODO: fill in your name here
         super(counter, NterTheVoid.class.getName());
+        boardAnalyser = new BoardAnalyser(new GameConfig(10,8,4));
+
     }
 
-    public List<List<Integer>> winStates(Counter[][] board){
-        List<List<Integer>> winCoordinates = new ArrayList<>();
-
-        // Check horizontal wins
-        for (int row = 0; row < board.length; row++) {
-            for (int col = 0; col <= board[row].length - 4; col++) {
-                List<Integer> coordinates = new ArrayList<>();
-                for (int i = 0; i < 4; i++) {
-                    coordinates.add(row);
-                    coordinates.add(col + i);
-                }
-                winCoordinates.add(coordinates);
-            }
+    private int minimax(Board board, int depth, boolean maximizingPlayer, Counter[][] counters, int alpha, int beta, Instant startTime) throws InvalidMoveException, TimeoutException {
+        if (depth == 0 || boardAnalyser.calculateGameState(board).isEnd()) {
+            return evaluateBoard(board);
+        }
+        if (Duration.between(startTime, Instant.now()).toSeconds() > 8){
+            throw new TimeoutException();
         }
 
-        // Check vertical wins
-        for (int col = 0; col < board[0].length; col++) {
-            for (int row = 0; row <= board.length - 4; row++) {
-                List<Integer> coordinates = new ArrayList<>();
-                for (int i = 0; i < 4; i++) {
-                    coordinates.add(row + i);
-                    coordinates.add(col);
+        if (maximizingPlayer) {
+            int maxScore = Integer.MIN_VALUE;
+            for (int i = 0; i < 10; i++) {
+                if (isMoveValid(i, BoardThief.stealCounters(board))) {
+                    Board boardCopy = new Board(board, i, getCounter());
+//                    System.out.printf("--depth: %d --column: %d",depth,i);
+                    int score = this.minimax(boardCopy, depth - 1, false, counters,alpha,beta,  startTime);
+                    maxScore = Math.max(maxScore, score);
+                    if (score > beta){
+                        break;
+                    }
+                    alpha = Math.max(alpha, score);
                 }
-                winCoordinates.add(coordinates);
             }
-        }
-
-        // Check diagonal wins (from top-left to bottom-right)
-        for (int row = 0; row <= board.length - 4; row++) {
-            for (int col = 0; col <= board[row].length - 4; col++) {
-                List<Integer> coordinates = new ArrayList<>();
-                for (int i = 0; i < 4; i++) {
-                    coordinates.add(row + i);
-                    coordinates.add(col + i);
+            return maxScore;
+        } else {
+            int minScore = Integer.MAX_VALUE;
+            for (int i = 0; i < 10; i++) {
+                if (isMoveValid(i, BoardThief.stealCounters(board))) {
+                    Board boardCopy = new Board(board, i, getCounter().getOther());
+//                    System.out.printf("--depth: %d --column: %d",depth,i);
+                    int score = minimax(boardCopy, depth - 1, true,counters,alpha,beta,  startTime);
+                    minScore = Math.min(minScore, score);
+                    if (score < alpha){
+                        break;
+                    }
+                    beta = Math.min(beta, score);
                 }
-                winCoordinates.add(coordinates);
             }
+            return minScore;
         }
-
-        // Check diagonal wins (from top-right to bottom-left)
-        for (int row = 0; row <= board.length - 4; row++) {
-            for (int col = 3; col < board[row].length; col++) {
-                List<Integer> coordinates = new ArrayList<>();
-                for (int i = 0; i < 4; i++) {
-                    coordinates.add(row + i);
-                    coordinates.add(col - i);
-                }
-                winCoordinates.add(coordinates);
-            }
-        }
-        winStates = winCoordinates;
-        return winCoordinates;
     }
 
-//    public List<Integer> possibleMoves(Counter[][] board){
-//
-//    }
+    private int evaluateBoard(Board board) {
+//        GameState gameState =  boardAnalyser.calculateGameState(board);
+        Counter[][] counters = BoardThief.stealCounters(board);
+        Counter counter = Connect4Board.getWinner(counters);
+        if (counter == getCounter()){
+//                System.out.println("\nwin");
+            return 100000;
+        } else if (counter == getCounter().getOther()){
+//                System.out.println("\nloss");
+            return -100000;
+        }
+        return 0;
+    }
 
-    public int takeRandomMove(Counter[][] counters){
-        Random rand = new Random();
+    public boolean isMoveValid(int move, Counter[][] counters){
+        return counters[move][7] == null;
+    }
 
-        while (true){
-            int move = rand.nextInt(9);
-            System.out.println(counters[move][7]);
-            if (counters[move][7] == null){
-                return move;
+    public int takeBetterMove(Counter[][] counters, Board board, int depth, Instant startTime) throws InvalidMoveException, TimeoutException {
+        int bestMove = -1;
+        int maxScore = Integer.MIN_VALUE;
+
+        for (int i = 0; i < 10; i++) {
+            if (isMoveValid(i, counters)) {
+                Board boardCopy = new Board(board, i, getCounter());
+                int score = minimax(boardCopy, depth, false, counters,Integer.MIN_VALUE,Integer.MAX_VALUE, startTime);
+                if (i == 4 || i == 5){
+                    score += 2;
+                }
+//                System.out.printf("Score at the %dth column is %d%n", i, score);
+                if (score > maxScore) {
+                    maxScore = score;
+                    bestMove = i;
+                }
             }
         }
+        System.out.println(bestMove);
+        return bestMove;
     }
 
     @Override
@@ -91,7 +112,23 @@ public class NterTheVoid extends Player {
         //TODO: make sure said analysis uses less than 2G of heap and returns within 10 seconds on whichever machine is running it
 
         Counter[][] counters =  BoardThief.stealCounters(board);
-        int move = takeRandomMove(counters);
+        int move = 0;
+        Instant startTime = Instant.now();
+        int depth = 4;
+
+        while (Duration.between(startTime, Instant.now()).toSeconds() < 7){
+            System.out.printf("at depth: %d\n",depth);
+            try {
+                move = takeBetterMove(counters,board,depth,startTime);
+            }catch (InvalidMoveException e) {
+                System.out.println(e);
+            } catch (TimeoutException e) {
+                break;
+            }
+            depth += 1;
+        }
         return move;
     }
 }
+
+
