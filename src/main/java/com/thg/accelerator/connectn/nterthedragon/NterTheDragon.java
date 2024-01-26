@@ -92,6 +92,10 @@ public class NterTheDragon extends Player {
     return gameState.isWin();
   }
 
+  public boolean isMoveValid(int move,Counter[][] counters){
+    return counters[move][7] == null;
+  }
+
   public boolean isMoveWinner(int move, Board board) throws InvalidMoveException {
     Board boardCheck = new Board(board,move,getCounter());
     GameState gameState =  boardAnalyser.calculateGameState(boardCheck);
@@ -100,24 +104,29 @@ public class NterTheDragon extends Player {
 
   public int takeBetterMove(Counter[][] counters, Board board) {
     for (int i = 0; i < 10; i++) {
-      try {
-        if (isMoveWinner(i, board)) {
-          return i;
+      if (isMoveValid(i,counters)){
+        try {
+
+          if (isMoveWinner(i, board)) {
+            return i;
+          }
+        } catch (InvalidMoveException e) {
+          throw new RuntimeException(e);
         }
-      } catch (InvalidMoveException e) {
-        throw new RuntimeException(e);
       }
+
     }
 
     for (int i = 0; i < 10; i++) {
-      try {
-        if (isMoveBlocker(i, board)) {
-          return i;
+      if (isMoveValid(i,counters)) {
+        try {
+          if (isMoveBlocker(i, board)) {
+            return i;
+          }
+        } catch (InvalidMoveException e) {
+          throw new RuntimeException(e);
         }
-      } catch (InvalidMoveException e) {
-        throw new RuntimeException(e);
       }
-
     }
     return takeRandomMove(counters);
   }

@@ -1,6 +1,5 @@
 package com.thg.accelerator.connectn.nterthedragon;
 
-package com.thg.accelerator.connectn.nterthedragon;
 import com.thehutgroup.accelerator.connectn.player.*;
 import com.thg.accelerator.connectn.nterthedragon.helpers.BoardAnalyser;
 import com.thg.accelerator.connectn.nterthedragon.helpers.GameState;
@@ -31,8 +30,9 @@ public class Ntertainer extends Player {
         if (maximizingPlayer) {
             int maxScore = Integer.MIN_VALUE;
             for (int i = 0; i < 10; i++) {
-                if (isMoveValid(i, counters)) {
+                if (isMoveValid(i, BoardThief.stealCounters(board))) {
                     Board boardCopy = new Board(board, i, getCounter());
+//                    System.out.printf("--depth: %d --column: %d",depth,i);
                     int score = minimax(boardCopy, depth + 1, false, counters);
                     maxScore = Math.max(maxScore, score);
                 }
@@ -41,8 +41,10 @@ public class Ntertainer extends Player {
         } else {
             int minScore = Integer.MAX_VALUE;
             for (int i = 0; i < 10; i++) {
-                if (isMoveValid(i, counters)) {
+                if (isMoveValid(i, BoardThief.stealCounters(board))) {
                     Board boardCopy = new Board(board, i, getCounter().getOther());
+//                    System.out.printf("--depth: %d --column: %d",depth,i);
+
                     int score = minimax(boardCopy, depth + 1, true,counters);
                     minScore = Math.min(minScore, score);
                 }
@@ -56,9 +58,11 @@ public class Ntertainer extends Player {
         if (gameState.isWin()){
             Counter counter = gameState.getWinner();
             if (counter == getCounter()){
-                return 1;
+//                System.out.println("\nwin");
+                return 100000;
             } else {
-                return -1;
+//                System.out.println("\nloss");
+                return -100000;
             }
         }
         return 0;
@@ -68,30 +72,6 @@ public class Ntertainer extends Player {
         return counters[move][7] == null;
     }
 
-    public int takeRandomMove(Counter[][] counters){
-        Random rand = new Random();
-
-        while (true){
-            int move = rand.nextInt(9);
-            System.out.println(counters[move][7]);
-            if (isMoveValid(move,counters)){
-                return move;
-            }
-        }
-    }
-//
-//    public boolean isMoveBlocker(int move, Board board) throws InvalidMoveException {
-//        Board boardCheck = new Board(board,move,getCounter().getOther());
-//        GameState gameState =  boardAnalyser.calculateGameState(boardCheck);
-//        return gameState.isWin();
-//    }
-//
-//    public boolean isMoveWinner(int move, Board board) throws InvalidMoveException {
-//        Board boardCheck = new Board(board,move,getCounter());
-//        GameState gameState =  boardAnalyser.calculateGameState(boardCheck);
-//        return gameState.isWin();
-//    }
-
     public int takeBetterMove(Counter[][] counters, Board board) throws InvalidMoveException {
         int bestMove = -1;
         int maxScore = Integer.MIN_VALUE;
@@ -100,13 +80,17 @@ public class Ntertainer extends Player {
             if (isMoveValid(i, counters)) {
                 Board boardCopy = new Board(board, i, getCounter());
                 int score = minimax(boardCopy, 0, false, counters);
-
+                if (i == 4 || i == 5){
+                    score += 2;
+                }
+                System.out.printf("Score at the %dth column is %d%n", i, score);
                 if (score > maxScore) {
                     maxScore = score;
                     bestMove = i;
                 }
             }
         }
+        System.out.println(bestMove);
         return bestMove;
     }
 
@@ -119,7 +103,13 @@ public class Ntertainer extends Player {
         int move = 0;
         try {
             move = takeBetterMove(counters,board);
+            System.out.println("----");
+            System.out.println(move);
+            System.out.println("----");
+
         } catch (InvalidMoveException e) {
+            System.out.println("-jwnbfjwefkwbfownfpwnfpwfpw");
+            System.out.println(e);
             throw new RuntimeException(e);
         }
         return move;
