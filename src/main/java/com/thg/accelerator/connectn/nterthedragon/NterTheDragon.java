@@ -128,6 +128,7 @@ public class NterTheDragon extends Player {
         }
       }
     }
+
     return takeRandomMove(counters);
   }
 
